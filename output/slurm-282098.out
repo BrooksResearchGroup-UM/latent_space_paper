@@ -1,0 +1,91 @@
+training_num_seq = 33972
+training_len_protein = 352
+training_num_res_type = 21
+testing_num_seq = 1091
+testing_len_protein = 352
+testing_num_res_type = 21
+
+    A VAE will be constructed based on the data in ../data/encoding with 33972 of 352 a.a. processed protein sequences. 
+    The VAE will be constructed with an input vector dimension of 7392, with 4 hidden layers with [2048, 1024, 128, 32] neurons each and a latent space dimension of 2. 
+    Optimization will proceed via the Adam optimizer using a 0.0005 weight decay, and the loss function will modulate the KLD contribution with the factor 1.00000. 
+    1000 epoches will be carried out to optimize the model. Batch size is 256. Learning rate is 0.0005. All processing will be done on the cuda. Random seed is 19.
+ 
+Time through 1th epoch: 2.8
+Epoch 1 complete! Average Loss: 853.8
+Start the reconstruction accuracy calculation of 1 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 24.9
+training reconstruction accuracy: 26.7
+------------------------------------------------------------
+Time through 100th epoch: 2.8
+Epoch 100 complete! Average Loss: 598.5
+Start the reconstruction accuracy calculation of 100 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 54.6
+training reconstruction accuracy: 50.5
+------------------------------------------------------------
+Time through 200th epoch: 2.8
+Epoch 200 complete! Average Loss: 569.0
+Start the reconstruction accuracy calculation of 200 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 56.8
+training reconstruction accuracy: 52.7
+------------------------------------------------------------
+Time through 300th epoch: 2.8
+Epoch 300 complete! Average Loss: 539.7
+Start the reconstruction accuracy calculation of 300 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 57.4
+training reconstruction accuracy: 54.5
+------------------------------------------------------------
+Time through 400th epoch: 2.8
+Epoch 400 complete! Average Loss: 513.3
+Start the reconstruction accuracy calculation of 400 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 58.9
+training reconstruction accuracy: 56.7
+------------------------------------------------------------
+Time through 500th epoch: 2.8
+Epoch 500 complete! Average Loss: 486.6
+Start the reconstruction accuracy calculation of 500 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 60.5
+training reconstruction accuracy: 58.4
+------------------------------------------------------------
+Time through 600th epoch: 2.8
+Epoch 600 complete! Average Loss: 463.0
+Start the reconstruction accuracy calculation of 600 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 61.2
+training reconstruction accuracy: 60.1
+------------------------------------------------------------
+Time through 700th epoch: 2.8
+Epoch 700 complete! Average Loss: 442.0
+Start the reconstruction accuracy calculation of 700 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 62.4
+training reconstruction accuracy: 61.8
+------------------------------------------------------------
+Time through 800th epoch: 2.8
+Epoch 800 complete! Average Loss: 418.3
+Start the reconstruction accuracy calculation of 800 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 62.8
+training reconstruction accuracy: 63.3
+------------------------------------------------------------
+Time through 900th epoch: 2.8
+Epoch 900 complete! Average Loss: 407.7
+Start the reconstruction accuracy calculation of 900 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 62.9
+training reconstruction accuracy: 64.0
+------------------------------------------------------------
+Time through 1000th epoch: 2.8
+Epoch 1000 complete! Average Loss: 381.6
+Start the reconstruction accuracy calculation of 1000 epoches
+------------------------------------------------------------
+testing reconstruction accuracy: 63.9
+training reconstruction accuracy: 66.0
+------------------------------------------------------------
+Final testing reconstruction accuracy: 63.9
+Final training reconstruction accuracy: 66.0
