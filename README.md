@@ -10,8 +10,8 @@
 
 #### Run hmmalign
 1. Create an HMM profile from your seed alignment.
-   ```bash ./data/PF01494_seed.hmm ./data/PF01494_seed.sto
-   hmmbuild 
-2. 
+   ```bash 
+   hmmbuild ./data/PF01494_seed.hmm ./data/PF01494_seed.sto
+2. Run alignment and output the result to a fasta file
    ```bash
    hmmalign ./data/PF01494_seed.hmm ./data/PF01494_input.fasta > ./data/PF01494_MSA.fasta
