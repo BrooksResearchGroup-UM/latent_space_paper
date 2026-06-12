@@ -1,5 +1,15 @@
 # latent_space_paper
 
+This repository contains code for training variational autoencoder models and performing downstream analysis.
+
+## Installation
+
+Requires Python >= 3.9.
+
+```bash
+mamba env create -f env.yaml
+```
+
 ### Multiple sequence alignment using HMMER
 #### HMMER installation:
 1. Download HMMER from the official [HMMER website](http://hmmer.org/download.html).
