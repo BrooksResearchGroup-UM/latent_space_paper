@@ -148,3 +148,25 @@ For the FDMO dataset:
 ```bash
 sbatch ./scripts/VAE_train_FDMO.sh
 ```
+
+## Obtain the embeddings using protein language models
+
+For ESM-1b and ESM-2 (650M/3B):
+
+Clone the repository of [esm](https://github.com/facebookresearch/esm/tree/main) and install esm by following the intructions. I created a separate environment for esm.
+
+Manually download the models using `wget` ([ESM-1b](https://dl.fbaipublicfiles.com/fair-esm/models/esm1b_t33_650M_UR50S.pt), [ESM-2-650M](https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t33_650M_UR50D.pt), [ESM-2-3B](https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t36_3B_UR50D.pt)) to `~/.cache/torch/hub/checkpoints` if needed.
+
+```bash
+sbatch ./scripts/esm_embedding.sh
+```
+
+For ProtT5-XL:
+
+Install [ProtTrans](https://github.com/agemagician/ProtTrans) by following the intructions. I created a separate environment for ProtTrans.
+
+Since HPC compute nodes lack internet access, download the ProtT5-XL model first by running Steps 1 and 2 in this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/ProtT5-XL-UniRef50.ipynb).
+
+```bash
+sbatch ./scripts/prott5_embedding.sh
+```
