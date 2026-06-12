@@ -33,45 +33,35 @@ Example: FDMO / Pfam PF01494
 hmmbuild ./data/processed/hmmer/FDMO/PF01494_seed.hmm ./data/processed/hmmer/FDMO/PF01494_seed.sto
 ```
 
-Run alignment:
+2.4. Run alignment:
 
 ```bash
 hmmalign ./data/processed/hmmer/FDMO/PF01494_seed.hmm ./data/raw/FDMO/PF01494_input.fasta > ./data/processed/fasta/FDMO/PF01494_MSA.fasta
 ```
 
-## Curation of the cyclase dataset
+## 3. Curation of the cyclase dataset
 
-Download bacterial database and combine all bacterial fasta files:
-```bash 
+3.1. Download and aggregate the complete RefSeq bacterial and archaeal protein sequence databases:
+
+```bash
+# Fetch and merge Bacterial database 
 wget -r -nH --cut-dirs=6 -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/bacteria/
-```
-```bash
 cat *.protein.faa.gz > bacteria_nonredundant_protein.faa.gz
-```
+rm *.protein.faa.gz
 
-Download archaeal database and combine all archaeal fasta files:
-```bash
+# Fetch and merge Archaeal database
 wget -r -nH --cut-dirs=6 -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/archaea/
-```
-```bash
 cat *.protein.faa.gz > archaea_nonredundant_protein.faa.gz
-```
+rm *.protein.faa.gz
 
-Combine bacterial and archaeal fasta files and unzip the gz file:
-```bash
-cat *_protein.faa.gz > refseq_protein_bacteria_archaea.faa.gz
-```
-```bash
+# Consolidate into a unified database matrix
+cat bacteria_nonredundant_protein.faa.gz archaea_nonredundant_protein.faa.gz > refseq_protein_bacteria_archaea.faa.gz
 gunzip refseq_protein_bacteria_archaea.faa.gz
 ```
 
-The hmmpress step is required for hmmsearch to work.
+3.2. Run hmmsearch:
 ```bash
-hmmpress PF05147.hmm
-```
-
-Run hmmsearch:
-```bash
+hmmpress PF05147.hmm # hmmpress step is required for hmmsearch to work.
 hmmsearch -A PF05147_hits.sto PF05147.hmm refseq_protein_bacteria_archaea.faa > PF05147.out
 ```
 
