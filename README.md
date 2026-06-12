@@ -12,7 +12,7 @@ mamba env create -f env.yml
 
 ## HMMER installation and run
 
-The training of VAE models requires aligned sequences, which can be done using HMMER.
+The training of VAE models requires aligned sequences of a protein family of interest, which can be acquired by multiple sequence alignment (MSA) using HMMER.
 
 To download HMMER, please follow the instructions on its official [HMMER website](http://hmmer.org/download.html).
 
@@ -34,18 +34,50 @@ Run alignment.
 hmmalign ./data/processed/hmmer/FDMO/PF01494_seed.hmm ./data/raw/FDMO/PF01494_input.fasta > ./data/processed/fasta/FDMO/PF01494_MSA.fasta
 ```
 
-### Multiple sequence alignment using HMMER
-#### HMMER installation:
-1. Download HMMER from the official [HMMER website](http://hmmer.org/download.html).
-2. Follow the installation instructions provided on the website or in the downloaded package.
-3. To verify that HMMER has been installed successfully, run the following command in your terminal or command line:
-   ```bash
-   hmmalign --version
+## Curation of the cyclase dataset
 
-#### Run hmmalign:
-1. Create an HMM profile from your seed alignment.
-   ```bash 
-   hmmbuild ./data/PF01494_seed.hmm ./data/PF01494_seed.sto
-2. Run alignment and output the result to a fasta file
-   ```bash
-   hmmalign ./data/PF01494_seed.hmm ./data/PF01494_input.fasta > ./data/PF01494_MSA.fasta
+Download bacterial database and combine all bacterial fasta files
+```bash 
+wget -r -nH --cut-dirs=6 -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/bacteria/
+```
+```bash
+cat *.protein.faa.gz > bacteria_nonredundant_protein.faa.gz
+```
+
+Download archaeal database and combine all archael fasta files
+```bash
+wget -r -nH --cut-dirs=6 -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/archaea/
+```
+```bash
+cat *.protein.faa.gz > archaea_nonredundant_protein.faa.gz
+```
+
+Combine bacterial and archaeal fasta files and decompression
+```bash
+cat *_protein.faa.gz > refseq_protein_bacteria_archaea.faa.gz
+```
+```bash
+gunzip refseq_protein_bacteria_archaea.faa.gz
+```
+
+The hmmpress step is required for hmmscan to work.
+```bash
+hmmpress PF05147.hmm
+```
+
+Run the hmmsearch
+```bash
+hmmsearch -A PF05147_hits.sto PF05147.hmm refseq_protein_bacteria_archaea.fasta > PF05147.out
+```
+
+Output the hits from hmmsearch to a fasta file
+```bash
+esl-reformat fasta PF05147.out > PF05147_hits.fasta
+```
+
+Filter sequences within the range of 200 to 500 amino acids and run MSA
+```bash
+hmmalign --outformat afa PF05147.hmm PF05147_hits_200_500aa.fasta > PF05147_hits_200_500aa_MSA.fasta
+```
+
+
