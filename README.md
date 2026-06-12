@@ -108,6 +108,12 @@ awk '/^ *[^- ]/ {print $9, $1}' class3_LanKC_hmmsearch.txt > class3_LanKC_hmmsea
 awk '/^ *[^- ]/ {print $9, $1}' class4_LanL_hmmsearch.txt > class4_LanL_hmmsearch_evalues.txt
 ```
 
+## RODEO (Rapid ORF Description and Evaluation Online) analysis
+
+The cyclase hits within 200–500 amino acids were first queried against a previous excel dataset in reported in [Precursor peptide-targeted mining of more than one hundred thousand genomes expands the lanthipeptide natural product family (Walker at el. 2020)](https://link.springer.com/article/10.1186/s12864-020-06785-7#Sec19).
+
+The remaining uncharacterized hits were splits into nine text files with 1000 max sequence ids in each file and the text files were submitted to [RODEO Webtool 2.0](https://webtool.ripp.rodeo/) for analysis. All `main_co_occur.csv` outputs from jobs were combined into `main_co_occu_all_.csv` and the cyclase sequences were classified using this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/rodeo_classification.ipynb).
+
 ## Generate the simulated dataset
 
 Output an LG amino-acid replacement matrix:
