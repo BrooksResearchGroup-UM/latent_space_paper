@@ -60,7 +60,7 @@ cat *_protein.faa.gz > refseq_protein_bacteria_archaea.faa.gz
 gunzip refseq_protein_bacteria_archaea.faa.gz
 ```
 
-The hmmpress step is required for hmmscan to work.
+The hmmpress step is required for hmmsearch to work.
 ```bash
 hmmpress PF05147.hmm
 ```
@@ -82,6 +82,7 @@ hmmalign --outformat afa PF05147.hmm PF05147_hits_200_500aa.fasta > PF05147_hits
 
 ## Run hmmsearch to identify class 3 and class 4 cyclases
 
+The hmmpress step is required for hmmsearch to work.
 ```bash
 hmmpress class3_LanKC.hmm
 ```
@@ -89,6 +90,7 @@ hmmpress class3_LanKC.hmm
 hmmpress class4_LanL.hmm
 ```
 
+Run hmmsearch:
 ```bash
 hmmsearch class3_LanKC.hmm PF05147_hits_upper.fasta > class3_LanKC_hmmsearch.txt
 ```
@@ -96,9 +98,53 @@ hmmsearch class3_LanKC.hmm PF05147_hits_upper.fasta > class3_LanKC_hmmsearch.txt
 hmmsearch class4_LanL.hmm PF05147_hits_upper.fasta > class4_LanL_hmmsearch.txt
 ```
 
+> **Note**: Change all lowercase amino acids to uppercase.
+
+Extract hmmsearch outputs:
 ```bash
 awk '/^ *[^- ]/ {print $9, $1}' class3_LanKC_hmmsearch.txt > class3_LanKC_hmmsearch_evalues.txt
 ```
 ```bash
 awk '/^ *[^- ]/ {print $9, $1}' class4_LanL_hmmsearch.txt > class4_LanL_hmmsearch_evalues.txt
+```
+
+## Generate the simulated dataset
+
+Output an LG amino-acid replacement matrix:
+```bash
+python ./scripts/read_LG_matrix.py
+```
+
+Generate sequences based on a random tree and the replacement matrix:
+```bash
+python ./scripts/simulate_msa.py
+```
+
+## Prepare input datasets for VAE training
+
+To pre-process MSA files and perform one-hot encoding for each dataset, use this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/MSA.ipynb).
+
+## VAE model training
+
+To train VAE models, first make sure the training dataset is ready.
+
+With conda environment with torch and cuda activated, run the training on clusters:
+
+For the simulated dataset:
+```bash
+sbatch ./scripts/VAE_train_simulated.sh
+```
+For the cyclase dataset:
+```bash
+sbatch ./scripts/VAE_train_cyclase.sh
+```
+Use [Optuna](https://github.com/optuna/optuna) for hyperparameter optimization:
+```bash
+sbatch ./scripts/VAE_train_optuna.sh
+```
+> **Note**: The example here is for the training on the cyclase dataset.
+
+For the FDMO dataset:
+```bash
+sbatch ./scripts/VAE_train_FDMO.sh
 ```
