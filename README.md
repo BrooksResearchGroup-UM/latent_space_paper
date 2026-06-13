@@ -44,6 +44,8 @@ hmmalign ./data/processed/hmmer/FDMO/PF01494_seed.hmm ./data/raw/FDMO/PF01494_in
 3.1. Download and aggregate the complete RefSeq bacterial and archaeal protein sequence databases:
 
 ```bash
+cd ./data/processed/fasta
+
 # Fetch and merge Bacterial database 
 wget -r -nH --cut-dirs=6 -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/bacteria/
 cat *.protein.faa.gz > bacteria_nonredundant_protein.faa.gz
@@ -61,119 +63,121 @@ gunzip refseq_protein_bacteria_archaea.faa.gz
 
 3.2. Run hmmsearch:
 ```bash
-hmmpress PF05147.hmm # hmmpress step is required for hmmsearch to work.
-hmmsearch -A PF05147_hits.sto PF05147.hmm refseq_protein_bacteria_archaea.faa > PF05147.out
+hmmpress ./data/processed/hmmer/cyclase/PF05147.hmm # hmmpress is required for hmmsearch to work.
+sbatch ./scripts/hmmersearch.sh
 ```
 
-Output the hits from hmmsearch to a fasta file:
+3.3. Output the hits from hmmsearch to a fasta file:
 ```bash
-esl-reformat fasta PF05147_hits.sto > PF05147_hits.fasta
+esl-reformat fasta ./data/processed/hmmer/cyclase/PF05147_hits.sto > ./data/processed/fasta/cyclase/PF05147_hits.fasta
 ```
 
-Filter sequences within the range of 200 to 500 amino acids and run MSA:
+3.4. Filter sequences by length (200 to 500 amino acids) and run MSA:
 ```bash
-hmmalign --outformat afa PF05147.hmm PF05147_hits_200_500aa.fasta > PF05147_hits_200_500aa_MSA.fasta
+seqkit seq -m 200 -M 500 ./data/processed/fasta/cyclase/PF05147_hits.fasta > ./data/processed/fasta/cyclase/PF05147_hits_200_500aa.fasta
+hmmalign --outformat afa ./data/processed/hmmer/cyclase/PF05147.hmm \
+    ./data/processed/fasta/cyclase/PF05147_hits_200_500aa.fasta > ./data/processed/fasta/cyclase/PF05147_hits_200_500aa_MSA.fasta
+
 ```
 
-## Run hmmsearch to identify class 3 and class 4 cyclases
+## 4. Identification of class 3 and class 4 cyclases
 
-The hmmpress step is required for hmmsearch to work.
+4.1. Run hmmsearch:
 ```bash
-hmmpress class3_LanKC.hmm
-```
-```bash
-hmmpress class4_LanL.hmm
-```
+# Lowercase to uppercase
+seqkit seq ./data/processed/fasta/cyclase/PF05147_hits.fasta --upper-case > ./data/processed/fasta/cyclase/PF05147_hits_upper.fasta 
 
-Run hmmsearch:
-```bash
-hmmsearch class3_LanKC.hmm PF05147_hits_upper.fasta > class3_LanKC_hmmsearch.txt
-```
-```bash
-hmmsearch class4_LanL.hmm PF05147_hits_upper.fasta > class4_LanL_hmmsearch.txt
+hmmpress ./data/processed/hmmer/cyclase/class3_LanKC.hmm
+hmmpress ./data/processed/hmmer/cyclase/class4_LanL.hmm
+
+# Run hmmsearch on HPC cluster
+sbatch ./scripts/hmmersearch2.sh
 ```
 
-> **Note**: Change all lowercase amino acids to uppercase (`PF05147_hits.fasta` >> `PF05147_hits_upper.fasta`).
-
-Extract hmmsearch outputs:
+4.2. Extract hmmsearch outputs:
 ```bash
-awk '/^ *[^- ]/ {print $9, $1}' class3_LanKC_hmmsearch.txt > class3_LanKC_hmmsearch_evalues.txt
-```
-```bash
-awk '/^ *[^- ]/ {print $9, $1}' class4_LanL_hmmsearch.txt > class4_LanL_hmmsearch_evalues.txt
+awk '/^ *[^- ]/ {print $9, $1}' ./data/processed/hmmer/cyclase/class3_LanKC_hmmsearch.txt > ./data/processed/hmmer/cyclase/class3_LanKC_hmmsearch_evalues.txt
+awk '/^ *[^- ]/ {print $9, $1}' ./data/processed/hmmer/cyclase/class4_LanL_hmmsearch.txt > ./data/processed/hmmer/cyclase/class4_LanL_hmmsearch_evalues.txt
+
+# Remove un-related text in the files.
+sed -i '/WP_/,$!d' ./data/processed/hmmer/cyclase/class3_LanKC_hmmsearch_evalues.txt
+sed -i '/Domain/,$d' ./data/processed/hmmer/cyclase/class3_LanKC_hmmsearch_evalues.txt
+
+sed -i '/WP_/,$!d' ./data/processed/hmmer/cyclase/class4_LanL_hmmsearch_evalues.txt
+sed -i '/Domain/,$d' ./data/processed/hmmer/cyclase/class4_LanL_hmmsearch_evalues.txt
 ```
 
-## RODEO (Rapid ORF Description and Evaluation Online) analysis
+## 5. RODEO (Rapid ORF Description and Evaluation Online) analysis
 
 The cyclase hits within 200–500 amino acids were first queried against a previous excel dataset in reported in [Precursor peptide-targeted mining of more than one hundred thousand genomes expands the lanthipeptide natural product family (Walker et al. 2020)](https://link.springer.com/article/10.1186/s12864-020-06785-7#Sec19).
 
 The remaining uncharacterized hits were split into nine text files with 1000 max sequence ids in each file and the text files were submitted to [RODEO Webtool 2.0](https://webtool.ripp.rodeo/) for analysis. All `main_co_occur.csv` outputs from jobs were combined into `main_co_occur_all_.csv` and the cyclase sequences were classified using this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/rodeo_classification.ipynb).
 
-## Generate the simulated dataset
+## 6. Generate the simulated dataset
 
-Output an LG amino-acid replacement matrix:
+6.1. Output an LG amino-acid replacement matrix:
 ```bash
 python ./scripts/read_LG_matrix.py
 ```
 
-Generate sequences based on a random tree and the replacement matrix:
+6.2. Generate sequences based on a random tree and the replacement matrix:
 ```bash
 python ./scripts/simulate_msa.py
 ```
 
-## Prepare input datasets for VAE training
+## 7. Prepare input datasets for VAE training
 
 To pre-process MSA files and perform one-hot encoding for each dataset, use this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/MSA.ipynb).
 
-## VAE model training
+## 8. VAE model training
 
 To train VAE models, first make sure the training dataset is ready.
 
-With conda environment with torch and cuda activated, run the training on clusters:
+With conda environment with torch and cuda activated, run the training on HPC cluster:
 
-For the simulated dataset, `train_simulated.py` was run on HPC clusters by:
+8.1. For the simulated dataset, `train_simulated.py` was run on HPC cluster by:
 ```bash
 sbatch ./scripts/VAE_train_simulated.sh
 ```
-For the cyclase dataset, `train_cyclase.py` was run on HPC clusters by:
+8.2. For the cyclase dataset, `train_cyclase.py` was run on HPC cluster by:
 ```bash
 sbatch ./scripts/VAE_train_cyclase.sh
 ```
-Use [Optuna](https://github.com/optuna/optuna) for hyperparameter optimization:
+8.3. Use [Optuna](https://github.com/optuna/optuna) for hyperparameter optimization:
 ```bash
 sbatch ./scripts/VAE_train_optuna.sh
 ```
 > **Note**: The example here is for the training on the cyclase dataset.
 
-For the FDMO dataset, `train_FDMO.py` was run on HPC clusters by:
+8.4. For the FDMO dataset, `train_FDMO.py` was run on HPC cluster by:
 ```bash
 sbatch ./scripts/VAE_train_FDMO.sh
 ```
 
-## Obtain the embeddings using protein language models
+## 9. Obtain the embeddings using protein language models
 
-For ESM-1b and ESM-2 (650M/3B):
+9.1. For ESM-1b and ESM-2 (650M/3B):
 
 Clone the repository of [esm](https://github.com/facebookresearch/esm/tree/main) and install esm by following the instructions. I created a separate environment for esm.
 
 Manually download the models using `wget` ([ESM-1b](https://dl.fbaipublicfiles.com/fair-esm/models/esm1b_t33_650M_UR50S.pt), [ESM-2-650M](https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t33_650M_UR50D.pt), [ESM-2-3B](https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t36_3B_UR50D.pt)) to `~/.cache/torch/hub/checkpoints` if needed.
 
-Embeddings were obtained by running `extract.py` on HPC clusters:
+Embeddings were obtained by running `extract.py` on HPC cluster:
 ```bash
 sbatch ./scripts/esm_embedding.sh
 ```
 
-For ProtT5-XL:
+9.2. For ProtT5-XL:
 
 Install [ProtTrans](https://github.com/agemagician/ProtTrans) by following the instructions. I created a separate environment for ProtTrans.
 
 Since HPC compute nodes lack internet access, download the ProtT5-XL model first by running Steps 1 and 2 in this [jupyter notebook](./notebooks/ProtT5-XL-UniRef50.ipynb).
 
-Embeddings were obtained by running `prott5_embedder.py` on HPC clusters:
+Embeddings were obtained by running `prott5_embedder.py` on HPC cluster:
 ```bash
 sbatch ./scripts/prott5_embedding.sh
 ```
 
-## Generate sequence similarity networks (SSNs)
+## 10. Generate sequence similarity networks (SSNs)
 
-SSNs were generated by [EFI - Enzyme Similarity Tool](https://efi.igb.illinois.edu/efi-est/), submitted through Option C - FASTA with the default setting. Initial SSN results were finalized using customized alignment score (AS) for downstream clustering. Clustering outputs (XGMML) were downloaded, reformatted using this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/ssn_analysis.ipynb), and visualized by [Cytoscape](https://cytoscape.org/). Clustering results were saved as CSV files for analysis.
+SSNs were generated by [EFI - Enzyme Similarity Tool](https://efi.igb.illinois.edu/efi-est/), submitted through Option C - FASTA with the default setting. Initial SSN results were finalized using customized alignment score (AS) for downstream clustering. Clustering outputs (XGMML) were downloaded, reformatted using this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/ssn_analysis.ipynb), and visualized by [Cytoscape](https://cytoscape.org/). Clustering results were exported as CSV files for analysis.
