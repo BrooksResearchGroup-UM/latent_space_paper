@@ -171,7 +171,7 @@ sbatch ./scripts/esm_embedding.sh
 
 Install [ProtTrans](https://github.com/agemagician/ProtTrans) by following the instructions. I created a separate environment for ProtTrans.
 
-Since HPC compute nodes lack internet access, download the ProtT5-XL model first by running Steps 1 and 2 in this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/ProtT5-XL-UniRef50.ipynb).
+Since HPC compute nodes lack internet access, download the ProtT5-XL model first by running Steps 1 and 2 in this [jupyter notebook](https://github.com/BrooksResearchGroup-UM/latent_space_paper/blob/main/notebooks/ProtT5_XL_UniRef50.ipynb).
 
 Embeddings were obtained by running `prott5_embedder.py` on HPC cluster:
 ```bash
